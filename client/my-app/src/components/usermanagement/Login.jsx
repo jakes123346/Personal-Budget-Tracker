@@ -1,16 +1,19 @@
 import React, {useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import "../styles/Login.css";
+import "../../styles/Login.css";
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false); 
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+        setLoading(true);
         try {
             const response = await axios.post('http://127.0.0.1:9090/api/users/login/', { email, password });
             localStorage.setItem('token', response.data.access);
@@ -25,10 +28,11 @@ const Login = () => {
     }catch(error){
         console.error('Login error:', error.response?.data || error.message);
         if (error.response){
-            if (error.response.data.error === "Invalid email"){
+            let error_message = error.response.data.non_field_errors.join(', ');
+            if (error_message === "Invalid email"){
                 setError('Email not found. Please register first.');
             }
-            else if (error.response.data.error === "Incorrect password"){
+            else if (error_message === "Incorrect password"){
                 setError('Incorrect password. Please try again.');
             }
             else {
@@ -44,10 +48,15 @@ const Login = () => {
 }
     return (
         <div className="login-wrapper d-flex justify-content-center align-items-center vh-100 position-relative">
-            <button className="btn btn-link position-absolute top-0 start-0 m-3" style = {{top: "20px", right:"20px"}} onClick={() => navigate("/")}>
-                Home    
+
+            <button className = "btn btn-danger position-absolute"
+            style = {{top:"20px" , right:"20px"}}
+            onClick ={() => navigate("/")}>
+                Home
             </button>
-            <div classname = "card shadow-lg border-0 rounded-4" style={{width:'28rem'}}>
+
+
+            <div className = "card shadow-lg border-0 rounded-4" style={{width:'28rem'}}>
                 <div className="card-body p-4"> 
                     <h3 className = "card-title mb-4 text-center fw-bold">Login</h3>
                     {error && <div className="alert alert-danger" role="alert">{error}</div>}

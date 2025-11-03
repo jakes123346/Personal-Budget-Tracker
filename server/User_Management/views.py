@@ -11,6 +11,16 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
     serializer_class = RegisterSerializer
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response({
+            "message": "User registered successfully",
+            "user_id": user.id,
+            "username": user.username,
+            "email": user.email
+        }, status=status.HTTP_201_CREATED)
 
 class UserDetailView(generics.RetrieveAPIView):
     queryset = User.objects.all()

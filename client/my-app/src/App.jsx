@@ -1,18 +1,20 @@
 import { useState } from 'react'
-import {BrowserRouter, Routes, Route} from 'react-router-dom'
+import {BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import React, {lazy,Suspense} from 'react'
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 
 const Home = lazy(() => import('./components/usermanagement/Home'))
 const Login = lazy(() => import('./components/usermanagement/Login'))
 const Register = lazy(() => import('./components/usermanagement/Register'))
-const Dashboard = lazy(() => import('./components/dashboard/Dashboard'))
+const Dashboard = lazy(() => import('./components/transactions/Dashboard'))
 const ProtectedRoute = lazy(() => import('./components/usermanagement/ProtectedRoute'))
 
 function App() {
   return (
     <BrowserRouter>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<div className = "text-center p-5">Loading...</div>}>
         <Routes>
           <Route path='/' element={<Home />} />
           <Route path='/login' element={<Login />} />

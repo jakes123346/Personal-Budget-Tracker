@@ -16,6 +16,11 @@ class RegisterSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError('A user with that email ID already exists')
             return value
 
+    def validate_username(self, value):
+            if User.objects.filter(username__iexact=value).exists():
+                raise serializers.ValidationError('Username already exists')
+            return value
+
     def validate_password(self, value):
             validate_password(value)
             return value
@@ -54,7 +59,7 @@ class LoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Invalid email")
 
             if not check_password(data['password'],user_obj.password):
-                raise serializers.ValidationError("oh Incorrect password")
+                raise serializers.ValidationError("Incorrect password")
 
             if not user_obj.is_active:
                 raise serializers.ValidationError("user account is disabled")

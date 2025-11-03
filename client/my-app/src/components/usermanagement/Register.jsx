@@ -10,6 +10,7 @@ const Register = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [loading, setLoading] = useState(false);  
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -41,6 +42,7 @@ const Register = () => {
         if (!validateInputs()) return;
 
         try {
+            setLoading(true);
             const response = await axios.post('http://127.0.0.1:9090/api/users/register/', {
                 first_name: firstName.trim(),
                 last_name: lastName.trim(),
@@ -48,7 +50,9 @@ const Register = () => {
                 email: email.trim(),
                 password: password
             });
+            console.log(response.data.message);
             if (response.data.message === "User registered successfully") {
+                alert("Registration Successful! Please login to continue.");
                 navigate('/login');
             } else {
                 setError('Registration failed. Please try again.');
@@ -56,15 +60,26 @@ const Register = () => {
         } catch (error) {
             console.error('Registration error:', error.response?.data || error.message);
             if (error.response) {
-                if (error.response.data.error === "Email already exists") {
-                    setError('Email is already registered. Please use a different email.');
-                } else if (error.response.data.error === "Username already exists") {
-                    setError('Username is already taken. Please choose a different username.');
-                } else {
-                    setError('An unexpected error occurred. Please try again later.');
+                console.log(error.response.data);
+                const emailErrorMessage = error.response.data.email ? error.response.data.email[0] : null;
+                const passwordErrorMessage = error.response.data.password ? error.response.data.password[0] : null;
+                const usernameErrorMessage = error.response.data.username? error.response.data.username[0] : null;
+
+                if (emailErrorMessage  === 'A user with that email ID already exists') {
+                        setError('Email is already registered. Please use a different email.');
+                    } 
+                else if (passwordErrorMessage && passwordErrorMessage.startsWith('This password')) {
+                        setError(passwordErrorMessage);
+                    }
+                else if (usernameErrorMessage === "A user with that username already exists.") {
+                        setError('Username is already taken. Please choose a different username.');
+                    } 
+                else {
+                        setError('An unexpected error occurred. Please try again later.');
+                    }
                 }
-            } else {
-                setError('Unable to connect to the server. Please try again later.');
+             else {
+                    setError('Unable to connect to the server. Please try again later.');
             }
         } finally {
             setLoading(false);
@@ -73,7 +88,13 @@ const Register = () => {
             // Any cleanup actions can be performed here
     return (
         <div className="register-wrapper d-flex justify-content-center align-items-center vh-100 position-relative">
-            <button className="card shadow-lg border-0 rounded-4" style = {{width:'28rem'}} >
+            <button className = "btn btn-danger position-absolute"
+            style = {{top:"20px" , right:"20px"}}
+            onClick ={() => navigate("/")}>
+                Home
+            </button>
+
+            <div className="card shadow-lg border-0 rounded-4" style = {{width:'28rem'}} >
                 <div className="card-body p-4"> 
                     <h3 className = "card-title mb-4 text-center fw-bold">Create Account</h3>
                     {error && <div className="alert alert-danger" role="alert">{error}</div>}
@@ -144,11 +165,11 @@ const Register = () => {
                                 required
                             />
                         </div>
-                        <button type="submit" className="register-btn btn btn-primary btn-block w-100" disabled={loading}>{loading ? "Registering...": "Register"} Register
+                        <button type="submit" className="register-btn btn btn-primary btn-block w-100" disabled={loading}>{loading ? "Registering...": "Register"}
                         </button>
                     </form>
                 </div>
-            </button>
+            </div>
         </div>
     );
 };
