@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
-    'User_Management'
+    'User_Management',
+    'transactions',
 ]
 CORS_ALLOWED_ORIGINS  = [
     "http://localhost:5173",
@@ -51,6 +52,7 @@ CORS_ALLOWED_ORIGINS  = [
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "content-type",
     "autorization"
+    
 ]
 
 SIMPLE_JWT = {
