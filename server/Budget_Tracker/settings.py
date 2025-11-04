@@ -44,9 +44,12 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'User_Management',
     'transactions',
+    'corsheaders',
+    'Analytics',
 ]
 CORS_ALLOWED_ORIGINS  = [
     "http://localhost:5173",
+    "http://127.0.0.1:9090"
 ]
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
@@ -54,6 +57,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     "autorization"
     
 ]
+CORS_ALLOW_ALL_ORIGINS = True
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes = 30 ),

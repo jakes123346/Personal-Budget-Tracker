@@ -27,8 +27,10 @@ const Login = () => {
             }
     }catch(error){
         console.error('Login error:', error.response?.data || error.message);
+        // console.log(error.response.data.non_field_errors.join(', '))
         if (error.response){
             let error_message = error.response.data.non_field_errors.join(', ');
+            console.log(error_message);
             if (error_message === "Invalid email"){
                 setError('Email not found. Please register first.');
             }
