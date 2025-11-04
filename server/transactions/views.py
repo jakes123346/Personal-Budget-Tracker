@@ -1,8 +1,21 @@
 from rest_framework import generics, filters
 from rest_framework.permissions import IsAuthenticated
-from .models import Transaction, Budget
-from .serializers import TransactionSerializer, BudgetSerializer
+from .models import Category, Transaction, Budget
+from .serializers import CategorySerializer, TransactionSerializer, BudgetSerializer
 
+# Category CRUD
+class CategoryListCreateView(generics.ListCreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]
+
+
+class CategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]
+
+# Transaction CRUD
 # GET /transactions with filters and POST /transactions
 class TransactionListCreateView(generics.ListCreateAPIView):
 
@@ -37,7 +50,22 @@ class TransactionListCreateView(generics.ListCreateAPIView):
     def perform_create(self,serializer):
         serializer.save(user=self.request.user)
 
+# GET(single transaction), PUT(update), DELETE(delete)
+class TransactionDetailView(generics.RetrieveUpdateDestroyAPIView):
+    
+    serializer_class = TransactionSerializer
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+
+        user = self.request.user 
+        queryset = Transaction.objects.all()
+        if not user.is_staff:
+            queryset = queryset.filter(user=user)
+        return queryset
+
+
+# Budget CRUD
 # GET /budget and POST /budget
 class BudgetListCreateView(generics.ListCreateAPIView):
 
@@ -56,4 +84,19 @@ class BudgetListCreateView(generics.ListCreateAPIView):
     
     def perform_create(self,serializer):
         serializer.save(user=self.request.user)
+
+
+class BudgetDetailView(generics.RetrieveUpdateDestroyAPIView):
+
+    serializer_class = BudgetSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+
+        user = self.request.user 
+        queryset = Budget.objects.all()
+        if not user.is_staff:
+            queryset = queryset.filter(user=user)
+        return queryset
+
 
