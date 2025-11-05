@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status   
-from transactions.models import Transaction
+from transactions.models import Transaction , Budget
 from django.db.models import Sum
 from django.utils.timezone import now
 from datetime import timedelta
@@ -10,48 +10,19 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 class AnalyticsSummaryView(APIView):
     permission_classes = [AllowAny]
-    # def get(self, request):
-    #     user = request.user
-    #     year = request.query_params.get('year', datetime.now().year)
-    #     month = request.query_params.get('month', datetime.now().month)
-
-    #     filters = {
-    #         'user': user,
-    #         'date__year': year,
-           
-    #     }
-    #     if month:
-    #         filters['date__month'] = month
-  
-
-    #     data = (
-    #         Transaction.objects
-    #         .filter(**filters)
-    #         .values("category")
-    #         .annotate(total_amount=Sum("amount"))
-    #         .order_by("-total_amount")
-    #     )
-
-    #     total_income = Transactions.objects.filter(**filters, type='income').aggregate(Sum('amount'))['amount__sum'] or 0
-    #     total_expense = Transactions.objects.filter(**filters, type='expense').aggregate(Sum('amount'))['amount__sum'] or 0
-    #     net_savings = total_income - total_expense
-    #     summary = {
-    #         "year": year,
-    #         "month": month,
-    #         "category_data": data,
-    #         'total_income': total_income,
-    #         'total_expense': total_expense,
-    #         'net_savings': net_savings,
-    #     }
-
-    #     return Response(summary, status=status.HTTP_200_OK)
 
     def get(self, request):
+        print(
+            "Authorization Header:", request.headers.get("Authorization")
+        )
+        print("User:", request.user)
         user = request.user
-        year = request.GET.get('year', now().year)
-        month = request.GET.get('month', now().month)   
+        year = request.GET.get('year')
+        month = request.GET.get('month')   
         mode = request.GET.get('mode', 'monthly')
-
+        print(user)
+        print(user.id)
+        
         if not year:
             return Response({"error": "Year parameter is required."}, status=status.HTTP_400_BAD_REQUEST)   
 
@@ -62,25 +33,26 @@ class AnalyticsSummaryView(APIView):
             return Response({"error": "Year and month must be integers."}, status=status.HTTP_400_BAD_REQUEST)  
 
         filters = {
-            'user': user,
+            'user_id': user.id,
             'date__year': year,
         }
         if mode == 'monthly' and month:
             filters['date__month'] = month  
 
         transactions = (
-            Transactions.objects
+            Transaction.objects
             .filter(**filters)
-            .values("category", "type")
+            .values("category__name", "type")
             .annotate(total_amount=Sum("amount"))
-            .order_by("category")
+            .order_by("category__name")
         )
+
 
         income_data = []
         expense_data = []   
         for t in transactions:
             entry = {
-                "category":t["category"],
+                "category":t["category__name"],
                 "total_amount": t["total_amount"]
                 }   
             if t["type"] == "income":
@@ -89,7 +61,7 @@ class AnalyticsSummaryView(APIView):
                 expense_data.append(entry)  
         
         budget_filters = {
-            'user': user,
+            'user_id': user.id,
             'year': year,
         }
         if mode == 'monthly' and month: 
@@ -97,15 +69,15 @@ class AnalyticsSummaryView(APIView):
         budgets= (
             Budget.objects
             .filter(**budget_filters)
-            .values("category")
+            .values("category__name")
             .annotate(budgeted_amount=Sum("amount"))
-            .order_by("category")
+            .order_by("category__name")
         )
 
         budget_data = []
         for b in budgets:
-            category = b["category"]
-            spent =   next((t["total_amount"] for t in transactions if t["category"] == category and t["type"] == "expense"), 0)
+            category = b["category__name"]
+            spent =   next((t["total_amount"] for t in transactions if t["category__name"] == category and t["type"] == "expense"), 0)
             budget_data.append({
                 "category": category,
                 "budgeted_amount": float(b["budgeted_amount"]),
@@ -117,21 +89,21 @@ class AnalyticsSummaryView(APIView):
         if mode == "annual":
             transactions = (
                 Transaction.objects
-                .filter(user=user, date__year=year)
+                .filter(user_id=user.id, date__year=year)
                 .values('month', 'type')
                 .annotate(total_amount=Sum('amount'))
             )
 
             income_data = [
-                {"category":t["category"],'amount': t["total_amount"]} for t in transactions if t["type"] == "income"
+                {"category":t["category__name"],'amount': t["total_amount"]} for t in transactions if t["type"] == "income"
             ]
 
             expense_data = [
-                {"category":t["category"],'amount': t["total_amount"]} for t in transactions if t["type"] == "expense"
+                {"category":t["category__name"],'amount': t["total_amount"]} for t in transactions if t["type"] == "expense"
             ]   
             budgets = (
                 Budget.objects
-                .filter(user=user, year=year)
+                .filter(user_id=user.id, year=year)
                 .values('month')
                 .annotate(total_budget=Sum('amount'))
             )
@@ -152,7 +124,7 @@ class AnalyticsSummaryView(APIView):
             "expense_data": expense_data,
             "budget_data": budget_data,
         }
-
+        print(summary)
         return Response(summary, status=status.HTTP_200_OK)
 
             

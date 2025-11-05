@@ -11,6 +11,7 @@ const Register = lazy(() => import('./components/usermanagement/Register'))
 const Dashboard = lazy(() => import('./components/transactions/Dashboard'))
 const ProtectedRoute = lazy(() => import('./components/usermanagement/ProtectedRoute'))
 const Analytics = lazy(() => import('./components/analytics/Analytics'))
+const Logout = lazy(() => import('./components/usermanagement/Logout'))
 
 function App() {
   return (
@@ -20,7 +21,11 @@ function App() {
           <Route path='/' element={<Home />} />
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
-          <Route path = '/analytics' element ={<Analytics />} />
+          <Route path='/logout' element={<Logout />} />
+          <Route path = '/analytics' element = {
+            <ProtectedRoute>
+              <Analytics />
+              </ProtectedRoute> }/>
           <Route path='/dashboard' element={
             <ProtectedRoute>
               <Dashboard />
