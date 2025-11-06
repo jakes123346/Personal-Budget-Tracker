@@ -73,13 +73,13 @@ const Analytics = () => {
           setLoading(false);
         }
       };
-
+ 
       const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
         const RADIAN = Math.PI / 180;
         const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
         const x = cx + radius * Math.cos(-midAngle * RADIAN);
         const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    
+   
         return (
           <text x={x} y={y} fill="white" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central" fontSize={12}>
             {`${(percent * 100).toFixed(1)}%`}
@@ -92,11 +92,11 @@ const Analytics = () => {
                 <div className="container-fluid">
                 <a className="navbar-brand fw-bold fs-3"  href="/">Analytics Dashboard</a>
                 <div className="ms-auto">
-                    <button 
-                    className="btn btn-outline-light me-2" 
+                    <button
+                    className="btn btn-outline-light me-2"
                     onClick={() => navigate('/dashboard')}>back</button>
-                    <button 
-                    className="btn btn-warning" 
+                    <button
+                    className="btn btn-warning"
                     onClick={() => navigate('/')}>Logout</button>
                 </div>
                 </div>
@@ -105,11 +105,11 @@ const Analytics = () => {
                    <p className="text-muted mt-2" textAlign="center" >
                   Select filters and click "Show results" to view analytics.
                 </p>
-
+ 
             </div>
                
-
-
+ 
+ 
           <div className="filter-section">
             <select onChange={(e) => setMonth(e.target.value)}>
               <option value="">Select Month</option>
@@ -140,10 +140,21 @@ const Analytics = () => {
               {loading ? "Loading..." : "Show results"}
             </button>
           </div>
-
+ 
         {showResults && ( <div className="analytics-grid">
               <div className="chart-card">
                 <h3>Income Overview</h3>
+                <div className="chart-note" textAlign="center">
+                    {mode === "monthly" && month && year ? (
+                      <p className="note">
+                        {`${getMonthName(month)} ${year} monthly Income`}
+                      </p>
+                    ) : (
+                      <p className="note" textAlign="center">
+                        {`Year ${year} annual income`}
+                      </p>
+                    )}
+                  </div>
                 {incomeData.length > 0 ? (
                   <>
                     <PieChart width={280} height={280}>
@@ -165,7 +176,7 @@ const Analytics = () => {
                           />
                         ))}
                       </Pie>
-                      <Tooltip 
+                      <Tooltip
                       formatter = {(value) =>[`₹${value.toLocaleString()}`,"Amount"]}
                       labelFormatter={(cat) => `Category: ${cat}`}
                       />
@@ -173,8 +184,10 @@ const Analytics = () => {
                     </PieChart>
                     <BarChart width={300} height={300} data={incomeData} margin = {{left:35}}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="category" label = {{value:"Category",position:"InsideBottom"}} />
-                      <YAxis label = {{value:"Amount (₹)", angle : -90,position:"outsideLeft",fontSize:10,offset:-20}}
+                      <XAxis dataKey="category" label = {{value:"Category",position:"InsideBottom",fontSize:10,offset:0,dy:20}}
+                      tick = {{fontSize:10,dx:-5}}
+                      />
+                      <YAxis label = {{value:"Amount (₹)", angle : -90,position:"outsideLeft",fontSize:10,offset:0,dx:-20}}
                       tick = {{fontSize:10,dx:-5}}
                       />
                       <Tooltip formatter = {(value)=> `₹${value.toLocaleString()}`}/>
@@ -188,6 +201,18 @@ const Analytics = () => {
               </div>
     <div className="chart-card">
                 <h3>Expense Overview</h3>
+                  <div className="chart-note" textAlign="center">
+                    {mode === "monthly" && month && year ? (
+                      <p className="note">
+                        {`${getMonthName(month)} ${year} monthly Expense`}
+                      </p>
+                    ) : (
+                      <p className="note" textAlign="center">
+                        {`Year ${year} annual Expense`}
+                      </p>
+                    )}
+                  </div>
+ 
                 {expenseData.length > 0 ? (
                   <>
                   <PieChart width={280} height={280}>
@@ -209,35 +234,50 @@ const Analytics = () => {
                         />
                       ))}
                     </Pie>
-                    <Tooltip                   
+                    <Tooltip                  
                       formatter = {(value) =>[`₹${value.toLocaleString()}`,"Amount"]}
                       labelFormatter={(cat) => `Category: ${cat}`} />
                     <Legend verticalAlign="bottom"/>
                   </PieChart>
                   <BarChart width={300} height={300} data={expenseData}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="category" label = {{value:"Category",position:"InsideBottom"}} />
-                      <YAxis label = {{value:"Amount (₹)", angle : -90,position:"outsideLeft",fontSize:10,offset:-20}}
+                      <XAxis dataKey="category" label = {{value:"Category",position:"InsideBottom",fontSize:10,offset:0,dy:20}}
+                      tick = {{fontSize:10,dx:0}} />
+                      <YAxis label = {{value:"Amount (₹)", angle : -90,position:"outsideLeft",fontSize:10,offset:0,dx:-20}}
                       tick = {{fontSize:10,dx:-5}}/>
                       <Tooltip formatter = {(value)=> `₹${value.toLocaleString()}`}/>
                       <Legend verticalAlign="bottom"/>
                       <Bar dataKey="total_amount" fill="#82ca9d" />
                     </BarChart>
                     </>
-
+ 
                 ) : (
                   <p>No expense data available for the selected period.</p>
                 )}
               </div>
     <div className="chart-card">
                 <h3>Budget Overview</h3>
+                <div className="chart-note" textAlign="center">
+                    {mode === "monthly" && month && year ? (
+                      <p className="note">
+                        {`${getMonthName(month)} ${year} monthly Budget`}
+                      </p>
+                    ) : (
+                      <p className="note" textAlign="center">
+                        {`Year ${year} annual Budget`}
+                      </p>
+                    )}
+                  </div>
+ 
                 {budgetData.length > 0 ? (
-                  <BarChart width={300} height={300} data={budgetData}>
+                  <BarChart width={320} height={300} data={budgetData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="category" />
-                    <YAxis />
+                      <XAxis dataKey="category" label = {{value:"Category",position:"InsideBottom",fontSize:10,offset:0,dy:20}}
+                      tick = {{fontSize:10,dy:10}} />
+                    <YAxis label = {{value:"Amount (₹)", angle : -90,position:"outsideLeft",fontSize:10,offset:0,dx:-20}}
+                      tick = {{fontSize:10,dx:-5}}/>
                     <Tooltip formatter={(value)=> `(₹)${value}`} />
-                    <Legend verticalAlign="bottom" height={36}/>
+                    <Legend verticalAlign="bottom" height={20}/>
                     <Bar dataKey="budgeted_amount" fill="#8884d8" name = "Budgeted_amount" barsize = {20} />
                     <Bar dataKey="spent_amount" fill="#82ca9d" name = "Spent_amount" barsize = {20} />
                   </BarChart>
@@ -251,3 +291,4 @@ const Analytics = () => {
       );
     };
 export default Analytics;
+ 

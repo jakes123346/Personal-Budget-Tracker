@@ -49,6 +49,8 @@ class TransactionListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self,serializer):
         serializer.save(user=self.request.user)
+        print("-------------------",self.request.user)
+
 
 # GET(single transaction), PUT(update), DELETE(delete)
 class TransactionDetailView(generics.RetrieveUpdateDestroyAPIView):

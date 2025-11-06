@@ -15,7 +15,7 @@ const Login = () => {
         setError('');
         setLoading(true);
         try {
-            const response = await axios.post('http://127.0.0.1:9090/api/users/login/', { email, password });
+            const response = await axios.post('http://127.0.0.1:8080/api/users/login/', { email, password });
             localStorage.setItem('token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
             localStorage.setItem('user', response.data.user_id);
@@ -27,7 +27,7 @@ const Login = () => {
             }
     }catch(error){
         console.error('Login error:', error.response?.data || error.message);
-        // console.log(error.response.data.non_field_errors.join(', '))
+        console.log(error.response.data.non_field_errors.join(', '))
         if (error.response){
             let error_message = error.response.data.non_field_errors.join(', ');
             console.log(error_message);

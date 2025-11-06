@@ -13,6 +13,7 @@ const ProtectedRoute = lazy(() => import('./components/usermanagement/ProtectedR
 const Analytics = lazy(() => import('./components/analytics/Analytics'))
 const Logout = lazy(() => import('./components/usermanagement/Logout'))
 
+
 function App() {
   return (
     <BrowserRouter>
@@ -32,6 +33,7 @@ function App() {
             </ProtectedRoute>
           } />
         </Routes>
+        
       </Suspense>
     </BrowserRouter>
   )

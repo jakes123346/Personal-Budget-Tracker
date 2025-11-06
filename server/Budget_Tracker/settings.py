@@ -49,7 +49,7 @@ INSTALLED_APPS = [
 ]
 CORS_ALLOWED_ORIGINS  = [
     "http://localhost:5173",
-    "http://127.0.0.1:9090"
+    "http://127.0.0.1:8080"
 ]
 
 CORS_ALLOW_HEADERS = list(default_headers) + [

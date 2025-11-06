@@ -15,9 +15,12 @@ class TransactionSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all(), source='category', write_only=True
     )
 
+    user = serializers.ReadOnlyField(source="user.username")
+
     class Meta:
         model = Transaction
         fields = ['id','user','type','category','category_id','amount','date']
+
 
 
 class BudgetSerializer(serializers.ModelSerializer):
