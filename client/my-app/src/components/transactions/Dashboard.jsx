@@ -7,24 +7,12 @@ import axios from "axios";
 import API from "../transactions/api";
 import "../../styles/dashboard.css";
 
-
  
 export default function Dashboard(){
     const [activeTab, setActiveTab] = useState("categories")
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-
-
-    // const NavigaetToAnalytics= async () => {
-    //   const token = localStorage.getItem('token');
-    //   if (!token) {
-    //     setError("No authentication token found. Please login.");
-    //     setLoading(false);
-    //     return;
-    //   }
-    //   navigate('/analytics');
-    // }
 
 
     return (

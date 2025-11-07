@@ -15,6 +15,7 @@ class TransactionSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all(), source='category', write_only=True
     )
 
+    # user is read only, don't have to send it from React.
     user = serializers.ReadOnlyField(source="user.username")
 
     class Meta:
@@ -29,6 +30,9 @@ class BudgetSerializer(serializers.ModelSerializer):
     category_id = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(),source='category',write_only=True
     )
+    user = serializers.ReadOnlyField(source="user.username")
+
+    # user is read only, don't have to send it from React.
     user = serializers.ReadOnlyField(source="user.username")
 
     class Meta:

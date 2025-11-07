@@ -121,7 +121,12 @@ export default function BudgetUI() {
                 setMessage({ type: "success", text: "Budget updated successfully!" });
                 setEditId(null);
             } else {
-                await API.post("budgets/", form);
+                await API.post("budgets/", {
+                    category_id: form.category_id,
+                    amount: parseFloat(form.amount),
+                    month: parseInt(form.month),
+                    year: parseInt(form.year)
+                });
                 setMessage({ type: "success", text: "Budget added successfully!" });
             }
             setForm({ category_id: "", amount: "", month: "", year: "" });

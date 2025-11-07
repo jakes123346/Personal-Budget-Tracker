@@ -21,8 +21,7 @@ export default function CategoryUI() {
         }
     };
 
-    // useEffect runs after the component first renders, [] means it runs only once, 
-    // so wehen CategoryUI loads, it calls fetchCategories() to populate the table
+    
     useEffect( () => {
         fetchCategories();
     },[]);

@@ -3,17 +3,24 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Category, Transaction, Budget
 from .serializers import CategorySerializer, TransactionSerializer, BudgetSerializer
 
-# Category CRUD
+# Category View
 class CategoryListCreateView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Category.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save()
 
 
 class CategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
+
 
 # Transaction CRUD
 # GET /transactions with filters and POST /transactions
@@ -56,7 +63,7 @@ class TransactionListCreateView(generics.ListCreateAPIView):
         else:
             print("Serializer is not valid:", serializer.errors)
         serializer.save(user=self.request.user)
-        print(user)
+
 
 # GET(single transaction), PUT(update), DELETE(delete)
 class TransactionDetailView(generics.RetrieveUpdateDestroyAPIView):

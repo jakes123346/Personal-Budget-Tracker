@@ -60,7 +60,7 @@ const Analytics = () => {
         setLoading(true);
         setShowResults(false);
     try {
-          let url = `http://127.0.0.1:9090/api/analytics/summary/?year=${year}&mode=${mode}`;
+          let url = `http://127.0.0.1:8080/api/analytics/summary/?year=${year}&mode=${mode}`;
           if (mode === "monthly" && month) url += `&month=${month}`;
           const res = await axios.get(url, {
             headers: {
