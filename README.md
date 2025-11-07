@@ -65,5 +65,5 @@ cd frontend
 npm install axios bootstrap react-router-dom
 
 # Start dev server
-npm start
+npm run dev
 
