@@ -1,0 +1,27 @@
+.dropdown-menu {
+  max-height: 300px;
+  overflow-y: auto;
+  min-width: 200px;
+  text-align: center; /* Center the text within the dropdown */
+  padding: 10px 0; /* Ensure content has enough padding */
+}
+.dropdown-item {
+  padding: 0.5rem 1.5rem; /* Provide more horizontal space for better visibility */
+  cursor: pointer;
+}
+#category-dropdown {
+  width: 100%;
+  text-align: center; /* Center text in the dropdown toggle button */
+}
+/* Ensure Checkboxes aren't cut-off */
+.form-check-label {
+  white-space: nowrap; /* Prevent text cutoff */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Responsive Design Considerations */
+@media (max-width: 768px) {
+  .dropdown-menu {
+    max-width: 100%; /* Ensure dropdown adjusts with screen size */
+  }
+}

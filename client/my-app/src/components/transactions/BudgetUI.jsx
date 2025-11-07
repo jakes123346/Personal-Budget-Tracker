@@ -1,11 +1,22 @@
 import { useState, useEffect } from "react";
 import API from "../transactions/api";
-import { Button } from "bootstrap/dist/js/bootstrap.bundle.min";
+import { Button } from "react-bootstrap";
+import { Dropdown, Form } from 'react-bootstrap';
+import "../../styles/dashboard.css";
+import CategoryDropdown from "./CategoryDropdown";
 
 export default function BudgetUI() {
+    const [selectedCategories, setSelectedCategories] = useState(["all"]);
 
+    const [mode, setMode] = useState("");
+    const [month, setMonth] = useState("");
+    const [year, setYear] = useState("");
     const [budgets, setBudgets] = useState([]);
-    const [categoreis, setCategories] = useState([]);
+    const [finalFilteredBudgets, setFilteredBudgets] = useState([])
+    const [categories, setCategories] = useState([]);
+    const [viewCategories,setViewCategories] = useState([])
+
+
     const [form, setForm] = useState({
         category_id: "",
         amount: "",
@@ -14,17 +25,72 @@ export default function BudgetUI() {
     });
 
     const [editId, setEditId] = useState(null);
-    const [message, setMessage] = useState({ type: "", text: ""});
-
+    const [message, setMessage] = useState({ type: "", text: "" });
+    // const [type, setType] = useState("all");
     // Fetch Budgets
+    const fetchFilteredBudget = async () => {
+        await fetchBudgets()
+        if (mode === "monthly" && !month) {
+            alert("please select a month")
+            return
+        }
+        if (mode === "yearly" && !year) {
+            alert("Please select a year")
+            return
+        }
+
+        let filteredBudgets = budgets
+        console.log(budgets)
+        console.log(mode)
+        console.log(year)
+        console.log(month)
+
+        if (mode === 'yearly' && year) {
+            filteredBudgets = filteredBudgets.filter(
+                budget => budget['year'] === parseInt(year)
+
+
+            );
+
+        }
+        if (mode === 'monthly' && year && month) {
+            console.log(parseInt(year))
+            filteredBudgets = filteredBudgets.filter(
+                budget => budget['year'] === parseInt(year)
+                    && budget['month'] === parseInt(month)
+            );
+
+        }
+        // Filter by selected categories if not "all"
+        if (selectedCategories && !selectedCategories.includes('all')) {
+            filteredBudgets = filteredBudgets.filter(budget =>
+                selectedCategories.includes(budget.category.name)
+            );
+            console.log(3, filteredBudgets)
+        }
+        filteredBudgets.sort((a, b) => new Date(b.date) - new Date(a.date));
+        console.log(filteredBudgets)
+        console.log(4, filteredBudgets)
+        // return filteredBudgets;
+        setFilteredBudgets(filteredBudgets)
+
+
+    }
+
+
     const fetchBudgets = async () => {
         try {
             const res = await API.get("budgets/")
             setBudgets(res.data)
         } catch (err) {
             console.error("Error fetching budgets:", err);
-            setMessage({ type: "danger", text: "Failed to fetch budgets."});
+            setMessage({ type: "danger", text: "Failed to fetch budgets." });
         }
+    };
+
+    const handleCategoryChange = (newCategories) => {
+        console.log("Selected Categories:", newCategories);
+        setSelectedCategories(newCategories);
     };
 
     // Fetch Categories
@@ -32,36 +98,38 @@ export default function BudgetUI() {
         try {
             const res = await API.get("categories/");
             setCategories(res.data);
+            setViewCategories(res.data)
         } catch (err) {
             console.error("Error fetching categories:", err);
-            setMessage({ type: "danger", text: "Failed to fetch categories."});
+            setMessage({ type: "danger", text: "Failed to fetch categories." });
         }
     };
 
-    useEffect( () => {
-        fetchBudgets();
+    useEffect(() => {
+        // fetchBudgets();
         fetchCategories();
-    },[]);
+    }, []);
 
 
     // Add or Update Budget
     const handleSubmit = async (e) => {
+        console.log(form)
         e.preventDefault();
         try {
             if (editId) {
                 await API.put(`budgets/${editId}/`, form);
-                setMessage({ type: "success", text: "Budget updated successfully!"});
+                setMessage({ type: "success", text: "Budget updated successfully!" });
                 setEditId(null);
-            } else { 
+            } else {
                 await API.post("budgets/", form);
-                setMessage({ type: "success", text: "Budget added successfully!"});
+                setMessage({ type: "success", text: "Budget added successfully!" });
             }
-            setForm({ category_id: "", amount: "", month: "", year: ""});
+            setForm({ category_id: "", amount: "", month: "", year: "" });
             fetchBudgets();
-            } catch (err) {
-                console.error("Error saving budget:",err);
-                setMessage({ type: "danger", text: "Failed to save budget."});
-            }
+        } catch (err) {
+            console.error("Error saving budget:", err);
+            setMessage({ type: "danger", text: "Failed to save budget." });
+        }
     };
 
     // Edit a Budget
@@ -73,7 +141,7 @@ export default function BudgetUI() {
             year: b.year,
         });
         setEditId(b.id);
-        setMessage({type: "info", text: `Editing budget for ${b.category?.name}`});
+        setMessage({ type: "info", text: `Editing budget for ${b.category?.name}` });
     };
 
     // Delete a Budget
@@ -81,117 +149,189 @@ export default function BudgetUI() {
         if (!window.confirm("Are you sure you want to delete this category?")) return;
         try {
             await API.delete(`budgets/${id}/`);
-            setMessage({ type: "success", text: "Budget deleted successfully!"});
+            setMessage({ type: "success", text: "Budget deleted successfully!" });
             fetchBudgets();
         } catch (err) {
-            console.error("Error deleting budget:",err);
-            setMessage({ type: "danger", text: "Failed to delete budget."})
+            console.error("Error deleting budget:", err);
+            setMessage({ type: "danger", text: "Failed to delete budget." })
         }
     };
 
-    return(
-        <div className="container mt-4">
-            <h3>Manage Budgets</h3> 
+    return (
+        <div className="analytics-container">
+            <div className="card p-4 shadow-sm mb-5">
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="row g-2 mb-4">
-                <div className="col-md-3">
-                    <select
-                        className="form-select"
-                        value={form.category_id}
-                        onChange={(e) => setForm({ ...form, category_id: e.target.value})}
-                        required 
-                    >
-                        <option value="">Select Category</option>
-                        {categoreis.map((cat) => (
-                            <option key={cat.id} value={cat.id}>
-                                {cat.name}
-                            </option>
-                        ))}
-                    </select>
+                <h4 className="centered-title">Manage Budgets</h4>
+
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="row g-2 mb-4">
+                    <div className="col-md-3">
+                        <select
+                            className="form-select"
+                            value={form.category_id}
+                            onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+                            required
+                        >
+                            <option value="">Select Category</option>
+                            {categories.map((cat) => (
+                                <option key={cat.id} value={cat.id}>
+                                    {cat.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="col-md-2">
+                        <input
+                            type="number"
+                            className="form-control"
+                            placeholder="Amount"
+                            value={form.amount}
+                            onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                            required
+                        />
+                    </div>
+                    <div className="col-md-2">
+
+                        <select
+                            className="form-select"
+                            value={form.month || ""} // Ensure it properly checks and renders current state
+                            onChange={(e) => setForm({ ...form, month: e.target.value })}
+                        >
+                            <option value="" disabled>Month</option> {/* Placeholder option */}
+                            {[...Array(12)].map((_, index) => (
+                                <option key={index + 1} value={index + 1}>
+                                    {new Date(0, index).toLocaleString('default', { month: 'long' })}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="col-md-2">
+                        <select
+                            className="form-select"
+                            value={form.year || ""} // Ensures proper selection behavior
+                            onChange={(e) => setForm({ ...form, year: e.target.value })}
+                        >
+                            <option value="" disabled>Year</option> {/* Placeholder option */}
+                            {[...Array(new Date().getFullYear() - 2000 + 1)].map((_, index) => {
+                                const year = 2000 + index;
+                                return (
+                                    <option key={year} value={year}>
+                                        {year}
+                                    </option>
+                                );
+                            })}
+                        </select>
+                    </div>
+                    <div className="col-md-2">
+                        <button className="btn btn-primary w-100">
+                            {editId ? "Update" : "Add"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div className="card p-4 shadow-sm mb-5">
+                <h4 className="centered-title">View budgets</h4>
+                <div className="row g-3 align-items-end mb-3">
+
+                    <div className="col-md-3">
+                        {/* <label className="form-label fw-bold">Category:</label> */}
+                        <CategoryDropdown
+                            categories={categories}
+                            selectedCategories={selectedCategories}
+                            onCategoryChange={handleCategoryChange}
+                        />
+                    </div>
+                    <div className="col-md-2">
+                        <select
+                            className="form-select"
+                            value={mode || ""}
+                            onChange={(e) => setMode(e.target.value)}
+                        >
+                            <option value="" disabled>Mode</option> {/* Placeholder option */}
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                    {mode === "monthly" && (
+                        <div className="col-md-2">
+                            <select className="form-select" onChange={(e) => setMonth(e.target.value)}>
+                                <option value="" disabled>Month</option> {/* Placeholder option */}
+                                {/* <option value="all">All</option> */}
+                                {[...Array(12)].map((_, index) => (
+                                    <option key={index + 1} value={index + 1}>
+                                        {new Date(0, index).toLocaleString('default', { month: 'long' })}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+                    <div className="col-md-2">
+                        {/* <label className="form-label fw-bold">Year:</label> */}
+                        <select className="form-select" onChange={(e) => setYear(e.target.value)}>
+                            <option value="" >Year</option> {/* Placeholder option */}
+                            {[...Array(new Date().getFullYear() - 2000 + 1)].map((_, index) => {
+                                const year = 2000 + index;
+                                return (
+                                    <option key={year} value={year}>
+                                        {year}
+                                    </option>
+                                );
+                            })}                       
+                         </select>
+                    </div>
+                    <div className="col-md-2">
+                        <button className="btn btn-primary w-100" onClick={fetchFilteredBudget}>Apply Filters</button>
+                    </div>
                 </div>
 
-                <div className="col-md-2">
-                    <input
-                        type="number"
-                        className="form-control"
-                        placeholder="Amount"
-                        value={form.amount}
-                        onChange={(e) => setForm({...form, amount: e.target.value})}
-                        required 
-                    />
-                </div>
-                <div className="col-md-2">
-                    <input 
-                        type="number"
-                        className="form-control"
-                        placeholder="Month(1-12)"
-                        value={form.month}
-                        onChange={(e) => setForm({... form, month: e.target.value})}
-                        required
-                    />
-                </div>
-                <div className="col-md-2">
-                    <input 
-                        type="number"
-                        className="form-control"
-                        placeholder="Year"
-                        value={form.year}
-                        onChange={(e) => setForm({ ...form, year: e.target.value})}
-                        required
-                    />
-                </div>
-                <div className="col-md-2">
-                    <button className="btn btn-primary w-100">
-                        {editId ? "Update" : "Add"}
-                    </button>
-                </div>
-            </form>
 
-            {/* Table */}
-            <table className="table table-bordered table-striped">
-                <thead className="table-light">
-                    <tr>
-                        <th>Category</th>
-                        <th>Amount</th>
-                        <th>Month</th>
-                        <th>Year</th>
-                        <th style={{ width: "150px "}}>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {budgets.length > 0 ? (
-                        budgets.map((b) => (
-                            <tr key={b.id}>
-                                <td>{b.category?.name}</td>
-                                <td>{b.amount}</td>
-                                <td>{b.month}</td>
-                                <td>{b.year}</td>
-                                <td>
-                                    <button
-                                        className="btn btn-sm btn-warning me-2"
-                                        onClick={() => handleEdit(b)}
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        className="btn btn-sm btn-danger"
-                                        onClick={() => handleDelete(b.id)}
-                                    >
-                                        Delete
-                                    </button>
+
+                {/* Table */}
+                <table className="table table-bordered table-striped">
+                    <thead className="table-light">
+                        <tr>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Month</th>
+                            <th>Year</th>
+                            <th style={{ width: "150px " }}>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {finalFilteredBudgets.length > 0 ? (
+                            finalFilteredBudgets.map((b) => (
+                                <tr key={b.id}>
+                                    <td>{b.category?.name}</td>
+                                    <td>{b.amount}</td>
+                                    <td>{b.month}</td>
+                                    <td>{b.year}</td>
+                                    <td>
+                                        <button
+                                            className="btn btn-sm btn-warning me-2"
+                                            onClick={() => handleEdit(b)}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="btn btn-sm btn-danger"
+                                            onClick={() => handleDelete(b.id)}
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="5" className="text-center text-muted">
+                                    No budget found
                                 </td>
                             </tr>
-                        ))
-                    ) :  (
-                        <tr>
-                            <td colSpan="5" className="text-center text-muted">
-                                No budget found
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+                        )}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }

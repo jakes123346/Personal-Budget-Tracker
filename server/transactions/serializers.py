@@ -29,6 +29,7 @@ class BudgetSerializer(serializers.ModelSerializer):
     category_id = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(),source='category',write_only=True
     )
+    user = serializers.ReadOnlyField(source="user.username")
 
     class Meta:
         model = Budget

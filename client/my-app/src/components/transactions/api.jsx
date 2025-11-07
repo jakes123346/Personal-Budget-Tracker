@@ -4,7 +4,7 @@ import axios from "axios";
 
 // Configure axios instance
 const API = axios.create({
-    baseURL: "http://127.0.0.1:8080/api/transactions/",
+    baseURL: "http://127.0.0.1:9090/api/transactions/",
 });
 
 // Add interceptor for JWT tokens

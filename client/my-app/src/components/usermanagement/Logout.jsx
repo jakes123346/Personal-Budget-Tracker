@@ -2,31 +2,27 @@ import axios from 'axios';
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Logout =async () => {
-    const navigate = useNavigate();
-    useEffect(() => {
-        const logoutUser = async () => {
-            try {
-                const refresh_token = localStorage.getItem('refresh_token');
-                await axios.post('http://localhost:8000/api/logout/', {
-                    refresh: refresh_token,
-                });
-                localStorage.removeItem('token');
-                localStorage.removeItem('refresh_token');
-                window.location.href = '/login';
-                window.location.reload(true);
-                // navigate('/login');
-            } catch (error) {
-                console.error('Error during logout:', error);
-            }
-        };
+// 
 
-        logoutUser();
+const Logout = () => {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('refresh_token');
+        sessionStorage.clear();
+
+        window.history.pushState(null,"","/");
+        window.addEventListener("popstate",() => {
+            window.history.pushState(null,"","/");
+        });
+
+        navigate('/',{ replace: true });
     }, [navigate]);
 
     return (
         <div>
-            <h2>Logging out...</h2>
+            <h2>You have been logged out.</h2>
         </div>
     );
 }

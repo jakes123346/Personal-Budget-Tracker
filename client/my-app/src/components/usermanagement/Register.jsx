@@ -43,7 +43,7 @@ const Register = () => {
 
         try {
             setLoading(true);
-            const response = await axios.post('http://127.0.0.1:8080/api/users/register/', {
+            const response = await axios.post('http://127.0.0.1:9090/api/users/register/', {
                 first_name: firstName.trim(),
                 last_name: lastName.trim(),
                 username : username.trim(),

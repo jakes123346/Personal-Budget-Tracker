@@ -1,15 +1,70 @@
-.analytics-btn{
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight:bold;
-    transition:0.3s;
+.dropdown-menu {
+  max-height: 300px;
+  overflow-y: auto;
+  min-width: 200px; /* Ensures dropdown has enough space */
+}
+.dropdown-item {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+#category-dropdown {
+  width: 100%;
+  text-align: left;
+}
+.note {
+  text-align: center;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+.dropdown-item:hover {
+  background-color: #f8f9fa; /* Light gray on hover */
+}
+.centered-title {
+  text-align: center; /* Center the text */
+  color: black; /* Set color to black */
+  margin-bottom: 10px; /* Optional spacing adjustment */
+  font-weight: bold; /* Set text to be bold */
+}
+.navbar-container {
+  display: flex;
+  justify-content: space-between; /* Distribute space equally */
+  align-items: center;           /* Center items vertically */
+  width: 100%;                   /* Full width navbar */
+}
+.navbar-brand {
+  flex-grow: 1;                  /* Allow the brand to take center due to space allocation */
+  text-align: center;            /* Center the text inside the anchor */
+}
+.nav-buttons {
+  display: flex;                 /* Flex layout for buttons */
 }
 
-.analytics-btn:hover{
-    background-color: #0056b3;
+.nav-link {
+  font-size: 18px; /* Increase the font size */
+  margin: 5px;     /* Adjust spacing if desired */
+  padding: 10px 15px; /* Padding for larger clickable area */
+}
+.flex-row {
+  display: flex; /* Use flexbox layout */
+  flex-wrap: wrap; /* Allow wrapping for screen sizes */
+  align-items: center; /* Center the items vertically */
+  justify-content: space-between; /* Space out items where possible */
+  gap: 1rem; /* Set gaps between items */
+  max-width: 100%; /* Ensure container respects screen width */
+}
+.flex-row div {
+  flex: 0 1 15%; /* Modify percentage as needed for fitting inside */
+  box-sizing: border-box; /* Include padding and border in width calculation */
+}
+.analytics-container{
+    padding: 20px;
+    background: #f5f7fa;
+    flex-direction: column;
+    min-height: 100vh;
+    width:100%;
+    margin-left:0px
+
+}
+.form-select option[disabled] {
+  color: #999; /* Subtle placeholder styling */
 }

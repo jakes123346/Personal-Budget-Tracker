@@ -15,7 +15,7 @@ const Login = () => {
         setError('');
         setLoading(true);
         try {
-            const response = await axios.post('http://127.0.0.1:8080/api/users/login/', { email, password });
+            const response = await axios.post('http://127.0.0.1:9090/api/users/login/', { email, password });
             localStorage.setItem('token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
             localStorage.setItem('user', response.data.user_id);

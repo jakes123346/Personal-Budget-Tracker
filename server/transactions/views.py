@@ -21,10 +21,12 @@ class TransactionListCreateView(generics.ListCreateAPIView):
 
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
+    
 
     def get_queryset(self):
 
         user = self.request.user 
+        print("hey ",user)
         queryset = Transaction.objects.all()
         
         # Admin can see all transactions
@@ -48,9 +50,13 @@ class TransactionListCreateView(generics.ListCreateAPIView):
         return queryset
 
     def perform_create(self,serializer):
+        if serializer.is_valid():
+            user = self.request.user
+            print("Creating transaction for user:", user)
+        else:
+            print("Serializer is not valid:", serializer.errors)
         serializer.save(user=self.request.user)
-        print("-------------------",self.request.user)
-
+        print(user)
 
 # GET(single transaction), PUT(update), DELETE(delete)
 class TransactionDetailView(generics.RetrieveUpdateDestroyAPIView):

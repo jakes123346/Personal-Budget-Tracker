@@ -65,4 +65,23 @@ select{
 .chart-card h3{
     text-align:center;
     margin-bottom:15px;
+    
+}
+
+.chart-note-container {
+  text-align: center; /* Center content horizontally */
+  width: 100%;
+  flex:1; /* Make sure container spans full width */
+}
+.chart-note {
+  display: inline-block; /* Ensures the note displays as a block element */
+  margin: 0 auto;
+  flex:1; /* Centers this within its parent */
+}
+
+.centered-title {
+  text-align: center; /* Center the text */
+  color: black; /* Set color to black */
+  margin-bottom: 20px; /* Optional spacing adjustment */
+  font-weight: bold; /* Set text to be bold */
 }

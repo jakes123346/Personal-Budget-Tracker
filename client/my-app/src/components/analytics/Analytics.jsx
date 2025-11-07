@@ -41,6 +41,13 @@ const Analytics = () => {
     "#5DADE2",
     "#48C9B0",
   ];
+    const getMonthName = (month) => {
+      const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      ];
+      return monthNames[month - 1];
+    };
     const fetchAnalytics = async () => {
         if (!year) {
           alert("Please select a year");
@@ -128,10 +135,14 @@ const Analytics = () => {
             </select>
             <select onChange={(e) => setYear(e.target.value)}>
               <option value="">Select Year</option>
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
-            </select>
+                            {[...Array(new Date().getFullYear() - 2000 + 1)].map((_, index) => {
+                                const year = 2000 + index;
+                                return (
+                                    <option key={year} value={year}>
+                                        {year}
+                                    </option>
+                                );
+                            })}             </select>
             <select onChange={(e) => setMode(e.target.value)}>
               <option value="monthly">Monthly</option>
               <option value="yearly">Yearly</option>
@@ -185,7 +196,7 @@ const Analytics = () => {
                     <BarChart width={300} height={300} data={incomeData} margin = {{left:35}}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="category" label = {{value:"Category",position:"InsideBottom",fontSize:10,offset:0,dy:20}}
-                      tick = {{fontSize:10,dx:-5}}
+                      tick = {{fontSize:10,dx:-5}} 
                       />
                       <YAxis label = {{value:"Amount (₹)", angle : -90,position:"outsideLeft",fontSize:10,offset:0,dx:-20}}
                       tick = {{fontSize:10,dx:-5}}
@@ -212,7 +223,6 @@ const Analytics = () => {
                       </p>
                     )}
                   </div>
- 
                 {expenseData.length > 0 ? (
                   <>
                   <PieChart width={280} height={280}>
@@ -268,7 +278,6 @@ const Analytics = () => {
                       </p>
                     )}
                   </div>
- 
                 {budgetData.length > 0 ? (
                   <BarChart width={320} height={300} data={budgetData}>
                     <CartesianGrid strokeDasharray="3 3" />
