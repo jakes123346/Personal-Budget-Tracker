@@ -169,11 +169,7 @@ export default function BudgetUI() {
                     month: parseInt(form.month),
                     year: parseInt(form.year)
                 });
-<<<<<<< HEAD
-                setMessage({ type: "success", text: "Budget added successfully!" });
-=======
                 setManageBudgetMessage({ type: "success", text: "Budget added successfully!" });
->>>>>>> 2ac065f (Final commit)
             }
             setForm({ category_id: "", amount: "", month: "", year: "" });
             fetchBudgets();
