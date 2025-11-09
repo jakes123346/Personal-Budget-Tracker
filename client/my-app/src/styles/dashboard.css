@@ -26,14 +26,16 @@
   font-weight: bold; /* Set text to be bold */
 }
 .navbar-container {
-  display: flex;
-  justify-content: space-between; /* Distribute space equally */
+ 
+  /* Distribute space equally */
   align-items: center;           /* Center items vertically */
-  width: 100%;                   /* Full width navbar */
+  width: 100%;    
+  text-align: center;               /* Full width navbar */
 }
 .navbar-brand {
   flex-grow: 1;                  /* Allow the brand to take center due to space allocation */
-  text-align: center;            /* Center the text inside the anchor */
+  text-align: center;
+              /* Center the text inside the anchor */
 }
 .nav-buttons {
   display: flex;                 /* Flex layout for buttons */
@@ -65,6 +67,18 @@
     margin-left:0px
 
 }
+
 .form-select option[disabled] {
   color: #999; /* Subtle placeholder styling */
+}
+
+.container-fluid {
+  display: flex; /* Flexbox layout */
+  align-items: center; /* Center items vertically within the flex container */
+  justify-content: center; /* Center items horizontally across the container */
+}
+html, body, #root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
 }

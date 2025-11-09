@@ -61,3 +61,22 @@ body, html, #root {
     height: 80px;
     object-fit: contain;
 }
+.container-fluid {
+  display: flex; /* Flexbox layout */
+  align-items: center; /* Center items vertically within the flex container */
+  justify-content: center; /* Center items horizontally across the container */
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between; /* Distribute space equally */
+  align-items: center;           /* Center items vertically */
+  width: 100%;                   /* Full width navbar */
+}
+.navbar-brand {
+  flex-grow: 1;                  /* Allow the brand to take center due to space allocation */
+  text-align: center;            /* Center the text inside the anchor */
+}
+.nav-buttons {
+  display: flex;                 /* Flex layout for buttons */
+}

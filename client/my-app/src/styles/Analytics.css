@@ -7,6 +7,11 @@
     margin-left:0px
 
 }
+html, body, #root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+}
 .content-section {
   flex: 1;  /* Equally distribute space */
 } /* Sample styles for elements within the dashboard */

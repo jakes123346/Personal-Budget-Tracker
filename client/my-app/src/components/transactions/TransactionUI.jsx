@@ -5,7 +5,7 @@ import "../../styles/dashboard.css";
 import CategoryDropdown from "./CategoryDropdown";
 
 export default function TransactionUI() {
-    const [selectedCategories, setSelectedCategories] = useState("");
+    const [selectedCategories, setSelectedCategories] = useState("all");
     const [mode, setMode] = useState("");
     const [month, setMonth] = useState("");
     const [year, setYear] = useState("");
@@ -21,11 +21,40 @@ export default function TransactionUI() {
     });
 
     const [editId, setEditId] = useState(null);
-    const [message, setMessage] = useState({ type: "", text: "" });
-    const [type, setType] = useState("");
+    const [ManageTransactionMessage, setManageTransactionMessage] = useState({ type: "", text: "" });
+    const [ViewTransactionMessage, setViewTransactionMessage] = useState({ type: "", text: "" })
+    const [type, setType] = useState("all");
 
-    const fetchFilteredTransactions = async () => {
-        await fetchTransactions()
+    const notifySuccess = (ManageTransactionMessage) => toast.success(ManageTransactionMessage, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+    });
+    useEffect(() => {
+        if (ManageTransactionMessage.type) {
+            const timer = setTimeout(() => {
+                setManageTransactionMessage({ type: '', text: '' }); // Clear the ManageTransactionMessage after 3 seconds
+            }, 3000);
+            return () => clearTimeout(timer); // Cleanup function to clear the timeout
+        }
+    }, [ManageTransactionMessage]);
+
+    useEffect(() => {
+        if (ViewTransactionMessage.type) {
+            const timer = setTimeout(() => {
+                setViewTransactionMessage({ type: '', text: '' }); // Clear the ManageTransactionMessage after 3 seconds
+            }, 3000);
+            return () => clearTimeout(timer); // Cleanup function to clear the timeout
+        }
+    }, [ViewTransactionMessage]);
+
+
+    const fetchFilteredTransactions = () => {
+
         if (mode === "monthly" && !month) {
             alert("please select a month")
             return
@@ -34,33 +63,50 @@ export default function TransactionUI() {
             alert("Please select a year")
             return
         }
+        // await fetchTransactions()
 
         let filteredTransactions = transactions
         console.log(type)
-        if (type && type !== "all") {
-            filteredTransactions = filteredTransactions.filter(transaction => transaction.type === type);
+        console.log(mode)
+        console.log(month)
+        console.log(year)
+
+        if (mode && year && mode !== "" && year !== '') {
+            if (type && type !== "all") {
+                filteredTransactions = filteredTransactions.filter(transaction => transaction.type === type);
+            }
+
+            if (mode === 'yearly' && year) {
+                console.log(year)
+                filteredTransactions = filteredTransactions.filter(
+                    transaction => new Date(transaction.date).getFullYear() === parseInt(year)
+                );
+            }
+            if (mode === 'monthly' && year && month) {
+                filteredTransactions = filteredTransactions.filter(
+                    transaction => new Date(transaction.date).getFullYear() === parseInt(year)
+                        && new Date(transaction.date).getMonth() + 1 === parseInt(month)
+                );
+            }
+            // Filter by selected categories if not "all"
+            if (selectedCategories && !selectedCategories.includes('all')) {
+                filteredTransactions = filteredTransactions.filter(transaction =>
+                    selectedCategories.includes(transaction.category.name)
+                );
+            }
+            setViewTransactionMessage({ type: "success", text: "Transactions data fetched succesfully" });
+            filteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+            // return filteredTransactions;
+            setFilteredTransactions(filteredTransactions)
+
+
+
+        }
+        else {
+            setViewTransactionMessage({ type: "danger", text: "Please select inputs for all required fileds" });
+
         }
 
-        if (mode === 'yearly' && year) {
-            filteredTransactions = filteredTransactions.filter(
-                transaction => new Date(transaction.date).getFullYear() === parseInt(year)
-            );
-        }
-        if (mode === 'monthly' && year && month) {
-            filteredTransactions = filteredTransactions.filter(
-                transaction => new Date(transaction.date).getFullYear() === parseInt(year)
-                    && new Date(transaction.date).getMonth() + 1 === parseInt(month)
-            );
-        }
-        // Filter by selected categories if not "all"
-        if (selectedCategories && !selectedCategories.includes('all')) {
-            filteredTransactions = filteredTransactions.filter(transaction =>
-                selectedCategories.includes(transaction.category.name)
-            );
-        }
-        filteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-        // return filteredTransactions;
-        setFilteredTransactions(filteredTransactions)
 
 
     }
@@ -68,11 +114,16 @@ export default function TransactionUI() {
     const fetchTransactions = async () => {
         try {
             const res = await API.get("transactions/");
+
             setTransaction(res.data);
+            // setViewTransactionMessage({ type: "success", text: "Transactions Data Fetched successfully!" });
+
             console.log(transactions)
         } catch (err) {
             console.error("Error fetching transactions:", err);
-            setMessage({ type: "danger", text: "Failed to fetch transactions." });
+            // setViewTransactionMessage({ type: "danger", text: "Failed to fetch transactions." });
+
+
         }
     };
 
@@ -88,12 +139,12 @@ export default function TransactionUI() {
             setCategories(res.data);
         } catch (err) {
             console.error("Error fetching categories:", err);
-            setMessage({ type: "danger", text: "Failed to load categories." });
+            setManageTransactionMessage({ type: "danger", text: "Failed to load categories." });
         }
     };
 
     useEffect(() => {
-        // fetchTransactions();
+        fetchTransactions();
         fetchCategories();
     }, []);
 
@@ -104,11 +155,11 @@ export default function TransactionUI() {
         try {
             if (editId) {
                 await API.put(`transactions/${editId}/`, form);
-                setMessage({ type: "success", text: "Transaction updated successfully!" });
+                // notifySuccess("Transaction updated successfully!");
+
+                setManageTransactionMessage({ type: "success", text: "Transaction updated successfully!" });
                 setEditId(null);
             } else {
-                console.log("-------before post-------------")
-                console.log(JSON.stringify(form))
                 // await API.post("transactions/", JSON.stringify(form));
                 await API.post("transactions/", {
                     type: form.type,
@@ -116,15 +167,14 @@ export default function TransactionUI() {
                     amount: parseFloat(form.amount),
                     date: form.date
                 });
-                console.log("----------- after post------------")
-                console.log("Submitting form:", form)
-                setMessage({ type: "success", text: 'Transaction added successfully!' });
+
+                setManageTransactionMessage({ type: "success", text: 'Transaction added successfully!' });
             }
             setForm({ type: "", category_id: "", amount: "", date: "" });
             // fetchTransactions();
         } catch (err) {
             console.error("Error saving transaction:", err);
-            setMessage({ type: "danger", text: "Failed to save transaction." })
+            setManageTransactionMessage({ type: "danger", text: "Failed to save transaction,check all required fields are filled properly." })
         }
     };
 
@@ -137,7 +187,7 @@ export default function TransactionUI() {
             date: t.date,
         });
         setEditId(t.id)
-        setMessage({ type: "info", text: `Editing transaction for ${t.category?.name}` });
+        setManageTransactionMessage({ type: "info", text: `Editing transaction for ${t.category?.name}` });
     };
 
     // Delete Transaction 
@@ -145,11 +195,11 @@ export default function TransactionUI() {
         if (!window.confirm("Are you sure you want to delete this transaction?")) return;
         try {
             await API.delete(`transactions/${id}/`);
-            setMessage({ type: "success", text: "Transaction deleted successfully!" });
+            setManageTransactionMessage({ type: "success", text: "Transaction deleted successfully!" });
             fetchTransactions();
         } catch (err) {
             console.error("Error deleting transaction:", err);
-            setMessage({ type: "danger", text: "Failed to delete transaction." })
+            setManageTransactionMessage({ type: "danger", text: "Failed to delete transaction." })
         }
     };
 
@@ -160,6 +210,7 @@ export default function TransactionUI() {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="row g-2 mb-4">
+                    {ManageTransactionMessage.type && <div className={`alert alert-${ManageTransactionMessage.type}`} style={{ textAlign: 'center' }} >{ManageTransactionMessage.text}</div>}
                     <div className="col-md-2">
                         <select
                             className="form-select"
@@ -217,11 +268,15 @@ export default function TransactionUI() {
             </div>
             <div className="card p-4 shadow-sm mb-5">
                 <h4 className="centered-title">View Transactions</h4>
+                <div>
+                    {ViewTransactionMessage.type && <div className={`alert alert-${ViewTransactionMessage.type}`} style={{ textAlign: 'center' }} >{ViewTransactionMessage.text}</div>}
+                </div>
                 <div className="flex-row mb-3">
+
                     <div className="col-md-2">
                         {/* <label className="form-label fw-bold">Type:</label> */}
                         <select className="form-select" onChange={(e) => setType(e.target.value)}>
-                            <option value=""disabled>Type</option>
+                            <option value="" disabled>Type</option>
                             <option value="all">All</option>
                             <option value="income">Income</option>
                             <option value="expense">Expense</option>
@@ -262,7 +317,7 @@ export default function TransactionUI() {
                     <div className="col-md-2">
                         {/* <label className="form-label fw-bold">Year:</label> */}
                         <select className="form-select" onChange={(e) => setYear(e.target.value)}>
-                            <option value="" disabled>Year</option> {/* Placeholder option */}
+                            <option value="">Year</option> {/* Placeholder option */}
                             {[...Array(new Date().getFullYear() - 2000 + 1)].map((_, index) => {
                                 const year = 2000 + index;
                                 return (
@@ -276,6 +331,7 @@ export default function TransactionUI() {
                     <div className="col-md-2">
                         <button className="btn btn-primary w-100" onClick={fetchFilteredTransactions}>Apply Filters</button>
                     </div>
+
                 </div>
 
                 {/* Table */}

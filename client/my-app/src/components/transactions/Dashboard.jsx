@@ -16,10 +16,10 @@ export default function Dashboard(){
 
 
     return (
-        <div className="analytics-container">
+        <div className="analytics-container" >
             <nav className = "navbar navbar-expand-lg navbar-dark bg-dark">
-                <div className="container-fluid">
-                <a className="navbar-brand fw-bold fs-3"  href="/">Personal Finance Dashboard</a>
+                <div className="container-fluid" >
+                <a className="navbar-brand fw-bold fs-3" href="/" >Personal Finance Dashboard</a>
                 <div className="ms-auto">
                     <button
                     className="btn btn-outline-light me-2"

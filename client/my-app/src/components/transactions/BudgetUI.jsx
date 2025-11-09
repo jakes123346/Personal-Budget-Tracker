@@ -14,7 +14,9 @@ export default function BudgetUI() {
     const [budgets, setBudgets] = useState([]);
     const [finalFilteredBudgets, setFilteredBudgets] = useState([])
     const [categories, setCategories] = useState([]);
-    const [viewCategories,setViewCategories] = useState([])
+    const [viewCategories, setViewCategories] = useState([])
+    const [ManageBudgetMessage, setManageBudgetMessage] = useState({ type: "", text: "" });
+    const [ViewBudgetMessage, setViewBudgetMessage] = useState({ type: "", text: "" })
 
 
     const [form, setForm] = useState({
@@ -25,11 +27,35 @@ export default function BudgetUI() {
     });
 
     const [editId, setEditId] = useState(null);
-    const [message, setMessage] = useState({ type: "", text: "" });
+
+    useEffect(() => {
+        if (ManageBudgetMessage.type) {
+            const timer = setTimeout(() => {
+                setManageBudgetMessage({ type: '', text: '' }); // Clear the ManageBudgetMessage after 3 seconds
+            }, 3000);
+            return () => clearTimeout(timer); // Cleanup function to clear the timeout
+        }
+    }, [ManageBudgetMessage]);
+
+    useEffect(() => {
+        if (ViewBudgetMessage.type) {
+            const timer = setTimeout(() => {
+                setViewBudgetMessage({ type: '', text: '' }); // Clear the ManageBudgetMessage after 3 seconds
+            }, 3000);
+            return () => clearTimeout(timer); // Cleanup function to clear the timeout
+        }
+    }, [ViewBudgetMessage]);
+    const getMonthName = (monthNumber) => {
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        return monthNames[monthNumber - 1]; // Convert month number to name (1-12 map to array index 0-11)
+    };
     // const [type, setType] = useState("all");
     // Fetch Budgets
-    const fetchFilteredBudget = async () => {
-        await fetchBudgets()
+    const fetchFilteredBudget = () => {
+        // await fetchBudgets()
         if (mode === "monthly" && !month) {
             alert("please select a month")
             return
@@ -45,36 +71,45 @@ export default function BudgetUI() {
         console.log(year)
         console.log(month)
 
-        if (mode === 'yearly' && year) {
-            filteredBudgets = filteredBudgets.filter(
-                budget => budget['year'] === parseInt(year)
+        if (mode && year && mode !== "" && year !== '') {
+            if (mode === 'yearly' && year) {
+                filteredBudgets = filteredBudgets.filter(
+                    budget => budget['year'] === parseInt(year)
 
 
-            );
+                );
+
+            }
+            if (mode === 'monthly' && year && month) {
+                console.log(parseInt(year))
+                filteredBudgets = filteredBudgets.filter(
+                    budget => budget['year'] === parseInt(year)
+                        && budget['month'] === parseInt(month)
+                );
+
+            }
+            // Filter by selected categories if not "all"
+            if (selectedCategories && !selectedCategories.includes('all')) {
+                filteredBudgets = filteredBudgets.filter(budget =>
+                    selectedCategories.includes(budget.category.name)
+                );
+                console.log(3, filteredBudgets)
+            }
+            setViewBudgetMessage({ type: "success", text: "Budget data fetched succesfully" });
+
+            filteredBudgets.sort((a, b) => new Date(b.date) - new Date(a.date));
+            console.log(filteredBudgets)
+            console.log(4, filteredBudgets)
+            // return filteredBudgets;
+            setFilteredBudgets(filteredBudgets)
+            console.log(finalFilteredBudgets)
+
 
         }
-        if (mode === 'monthly' && year && month) {
-            console.log(parseInt(year))
-            filteredBudgets = filteredBudgets.filter(
-                budget => budget['year'] === parseInt(year)
-                    && budget['month'] === parseInt(month)
-            );
+        else {
+            setViewBudgetMessage({ type: "danger", text: "Please select inputs for all required fileds" });
 
         }
-        // Filter by selected categories if not "all"
-        if (selectedCategories && !selectedCategories.includes('all')) {
-            filteredBudgets = filteredBudgets.filter(budget =>
-                selectedCategories.includes(budget.category.name)
-            );
-            console.log(3, filteredBudgets)
-        }
-        filteredBudgets.sort((a, b) => new Date(b.date) - new Date(a.date));
-        console.log(filteredBudgets)
-        console.log(4, filteredBudgets)
-        // return filteredBudgets;
-        setFilteredBudgets(filteredBudgets)
-
-
     }
 
 
@@ -82,9 +117,11 @@ export default function BudgetUI() {
         try {
             const res = await API.get("budgets/")
             setBudgets(res.data)
+            // setViewBudgetMessage({ type: "succes", text: "Budget Data fetched succesfully" });
+
         } catch (err) {
             console.error("Error fetching budgets:", err);
-            setMessage({ type: "danger", text: "Failed to fetch budgets." });
+            // setViewBudgetMessage({ type: "danger", text: "Failed to fetch budgets." });
         }
     };
 
@@ -101,12 +138,12 @@ export default function BudgetUI() {
             setViewCategories(res.data)
         } catch (err) {
             console.error("Error fetching categories:", err);
-            setMessage({ type: "danger", text: "Failed to fetch categories." });
+            setManageBudgetMessage({ type: "danger", text: "Failed to fetch categories." });
         }
     };
 
     useEffect(() => {
-        // fetchBudgets();
+        fetchBudgets();
         fetchCategories();
     }, []);
 
@@ -117,8 +154,13 @@ export default function BudgetUI() {
         e.preventDefault();
         try {
             if (editId) {
-                await API.put(`budgets/${editId}/`, form);
-                setMessage({ type: "success", text: "Budget updated successfully!" });
+                await API.put(`budgets/${editId}/`, {
+                    category_id: form.category_id,
+                    amount: parseFloat(form.amount),
+                    month: parseInt(form.month),
+                    year: parseInt(form.year)
+                });
+                setManageBudgetMessage({ type: "success", text: "Budget updated successfully!" });
                 setEditId(null);
             } else {
                 await API.post("budgets/", {
@@ -127,13 +169,17 @@ export default function BudgetUI() {
                     month: parseInt(form.month),
                     year: parseInt(form.year)
                 });
+<<<<<<< HEAD
                 setMessage({ type: "success", text: "Budget added successfully!" });
+=======
+                setManageBudgetMessage({ type: "success", text: "Budget added successfully!" });
+>>>>>>> 2ac065f (Final commit)
             }
             setForm({ category_id: "", amount: "", month: "", year: "" });
             fetchBudgets();
         } catch (err) {
             console.error("Error saving budget:", err);
-            setMessage({ type: "danger", text: "Failed to save budget." });
+            setManageBudgetMessage({ type: "danger", text: "Failed to save budget. Pleaase check if all inputs are provided" });
         }
     };
 
@@ -146,7 +192,7 @@ export default function BudgetUI() {
             year: b.year,
         });
         setEditId(b.id);
-        setMessage({ type: "info", text: `Editing budget for ${b.category?.name}` });
+        setManageBudgetMessage({ type: "info", text: `Editing budget for ${b.category?.name}` });
     };
 
     // Delete a Budget
@@ -154,11 +200,11 @@ export default function BudgetUI() {
         if (!window.confirm("Are you sure you want to delete this category?")) return;
         try {
             await API.delete(`budgets/${id}/`);
-            setMessage({ type: "success", text: "Budget deleted successfully!" });
+            setManageBudgetMessage({ type: "success", text: "Budget deleted successfully!" });
             fetchBudgets();
         } catch (err) {
             console.error("Error deleting budget:", err);
-            setMessage({ type: "danger", text: "Failed to delete budget." })
+            setManageBudgetMessage({ type: "danger", text: "Failed to delete budget." })
         }
     };
 
@@ -168,8 +214,11 @@ export default function BudgetUI() {
 
                 <h4 className="centered-title">Manage Budgets</h4>
 
+
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="row g-2 mb-4">
+                    {ManageBudgetMessage.type && <div className={`alert alert-${ManageBudgetMessage.type}`}>{ManageBudgetMessage.text}</div>}
+
                     <div className="col-md-3">
                         <select
                             className="form-select"
@@ -237,6 +286,10 @@ export default function BudgetUI() {
             </div>
             <div className="card p-4 shadow-sm mb-5">
                 <h4 className="centered-title">View budgets</h4>
+                <div>
+                    {ViewBudgetMessage.type && <div className={`alert alert-${ViewBudgetMessage.type}`} style={{ textAlign: 'center' }} >{ViewBudgetMessage.text}</div>}
+                </div>
+
                 <div className="row g-3 align-items-end mb-3">
 
                     <div className="col-md-3">
@@ -282,11 +335,12 @@ export default function BudgetUI() {
                                         {year}
                                     </option>
                                 );
-                            })}                       
-                         </select>
+                            })}
+                        </select>
                     </div>
                     <div className="col-md-2">
                         <button className="btn btn-primary w-100" onClick={fetchFilteredBudget}>Apply Filters</button>
+
                     </div>
                 </div>
 
@@ -306,10 +360,11 @@ export default function BudgetUI() {
                     <tbody>
                         {finalFilteredBudgets.length > 0 ? (
                             finalFilteredBudgets.map((b) => (
+
                                 <tr key={b.id}>
                                     <td>{b.category?.name}</td>
                                     <td>{b.amount}</td>
-                                    <td>{b.month}</td>
+                                    <td>{getMonthName(b.month)}</td>
                                     <td>{b.year}</td>
                                     <td>
                                         <button

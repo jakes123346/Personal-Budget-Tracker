@@ -7,17 +7,19 @@ export default function CategoryUI() {
     const [categoreis, setCategories] = useState([]);
     const [name, setName] = useState("");
     const [editId, setEditId] = useState(null);
-    const [message, setMessage] = useState({ type: "", text: ""});
+    const [categoryMessage, setCategoryMessage] = useState({ type: "", text: ""});
 
     // Fetching all Catagories
     const fetchCategories = async () => {
         try{
                 const res = await  API.get("categories/");
                 setCategories(res.data);
+            setCategoryMessage({type: "success", text: "Categories Fetched successfully!" });
+
         }
         catch (err) {
             console.error("Error fetching categories:",err);
-            setMessage({type:"danger", text:"Failed to fetch categories."});
+            setCategoryMessage({type:"danger", text:"Failed to fetch categories."});
         }
     };
 
@@ -33,17 +35,17 @@ export default function CategoryUI() {
         try {
             if(editId) {
                 await API.put(`categories/${editId}/`, {name});
-                setMessage({type:"success", text: "Category updated successfully!"});
+                setCategoryMessage({type:"success", text: "Category updated successfully!"});
                 setEditId(null);
             }else{
                 await API.post("categories/",{name});
-                setMessage({type:"success", text: "Category added successfully!"});
+                setCategoryMessage({type:"success", text: "Category added successfully!"});
             }
             setName("");
             fetchCategories();
         }catch (err) {
             console.error("Error saving category:",err)
-            setMessage({type: "danger", text: "Failed to save category."})
+            setCategoryMessage({type: "danger", text: "Failed to save category."})
         }
     
     };
@@ -52,7 +54,7 @@ export default function CategoryUI() {
     const handleEdit = (cat) => {
         setName(cat.name);
         setEditId(cat.id);
-        setMessage({type: "info", text:`Editing category: ${cat.name}`});
+        setCategoryMessage({type: "info", text:`Editing category: ${cat.name}`});
     };
 
     //Delete a Category
@@ -60,11 +62,11 @@ export default function CategoryUI() {
         if (!window.confirm("Are you sure you want to delete this category?")) return;
         try {
             await API.delete(`categories/${id}/`);
-            setMessage({type: "success", text: "Category deleted successfully!"});
+            setCategoryMessage({type: "success", text: "Category deleted successfully!"});
             fetchCategories();
         }catch (err){
             console.error("Error deleting category:", err);
-            setMessage({type: "danger", text: "Failed to delete category."})
+            setCategoryMessage({type: "danger", text: "Failed to delete category."})
         }
     };
 

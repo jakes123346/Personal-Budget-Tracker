@@ -7,7 +7,11 @@
     background : url("../assets/Budget_image8.png") no-repeat center center fixed;  
 
 }
-
+html, body, #root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+}
 .card{
     border: radius 15px;
     background-color: #ffffff;
